@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 use App\Models\User;
+use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
+use DB;
 
 Class UserController extends Controller {
+    use ApiResponser;
     private $request;
 
     public function __construct(Request $request)
@@ -12,12 +15,21 @@ Class UserController extends Controller {
         $this->request = $request;
     }
     public function getUsers(){
-        $users = User::all();
-        return response()->json($users,200);
+        //$users = User::all();
+        //return response()->json($users,200);
+        $users = DB::connection('mysql')
+            ->select("SELECT * FROM users");
+
+            return response()->json($users,200);
     }
+    /**
+     * Return the list of users
+     * @return Illuminate\Http\Response
+     */
     public function index(){
         $users = User::all();
-        return response()->json($users,200);
+        //return response()->json($users,200);
+        return $this->successResponse($users);
     }
     public function add(Request $request){
         $rules = [
