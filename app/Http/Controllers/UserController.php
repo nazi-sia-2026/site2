@@ -50,11 +50,14 @@ Class UserController extends Controller {
     }
     public function show($id)
     {
-        $user = User::where('id',$id)->first();
-        if(!$user){
-            return response()->json(['message' => 'User not Found.'],404);
+        $users = User::where('id',$id)->first();
+        if($users){
+            return $this->successResponse($users);
+        }{
+            return $this->errorResponse('User not Found.', Response::HTTP_NOT_FOUND);
+            //return response()->json(['message' => 'User not Found.'],404);
+        //return response()->json($user,200);
         }
-        return response()->json($user,200);
     }
     public function delete($id){
         $user = User::where('id',$id)->first();
