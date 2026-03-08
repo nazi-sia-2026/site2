@@ -44,8 +44,8 @@ Class UserController extends Controller {
 
         $this->validate($request,$rules);
         //$user = User::create($request->all());
-        $user = User::create($request->only('username','password','gender'));
-        return response()->json($user,201);
+        $users = User::create($request->only('username','password','gender'));
+        return response()->json($users,201);
         //return $this->successResponse($users, Response::HTTP_CREATED);
     }
     public function show($id)
@@ -60,14 +60,33 @@ Class UserController extends Controller {
         }
     }
     public function delete($id){
-        $user = User::where('id',$id)->first();
-        if($user) { 
-            $user->delete();
+        //$users = User::findOrFail($id);
+        //$users->delete();
+        //return $this->errorResponse('User ID Does Not Exist.', Response::HTTP_NOT_FOUND);
+        $users = User::where('id',$id)->first();
+        if($users) { 
+            $users->delete();
             return response()->json(['message' => 'User deleted successfully.'],200);
         }
-        return response()->json(['message' => 'User not Found.'],404);
+        return $this->errorResponse('User ID Does Not Exist.', Response::HTTP_NOT_FOUND);
+        //return response()->json(['message' => 'User not Found.'],404);
     }
     public function update($id, Request $request){
+        $rules = [
+            'username' => 'max:20',
+            'password' => 'max:20',
+            'gender' => 'in:Male,Female'
+        ];
+        $this->validate($request, $rules);
+        $users = User::findOrFail($id);
+        $users->fill($request->all());
+        //Check if any changes were made
+        if($users->isClean()){
+            return response()->errorResponse(['At least one value must change.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+        $users->save();
+        return response()->successResponse($users);
+        /* old code
         $user = User::where('id', $id)->first();
         if(!$user){ 
             return response()->json(['message' => 'User not Found.'],404);
@@ -79,6 +98,7 @@ Class UserController extends Controller {
         ];
         $this->validate($request, $rules);
         $user->update($request->all());
-        return response()->json($user,200); 
-    }
+        return response()->json($user,200);
+        */
+        }
 }
