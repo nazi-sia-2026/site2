@@ -20,7 +20,8 @@ Class UserController extends Controller {
         $users = DB::connection('mysql')
             ->select("SELECT * FROM users");
 
-            return response()->json($users,200);
+            //return response()->json($users,200);
+            return $this->successResponse($users);
     }
     /**
      * Return the list of users
@@ -34,12 +35,17 @@ Class UserController extends Controller {
     public function add(Request $request){
         $rules = [
             'username' => 'required|string|unique:users,username',
-            'password' => 'required|string|min:6|max:20',
+            //'password' => 'required|string|min:6|max:20',
+            //'username' => 'required|max:20',
+            'password' => 'required|max:20',
+            'gender' => 'required|in:Male,Female'
         ];
 
         $this->validate($request,$rules);
-        $user = User::create($request->all());
+        //$user = User::create($request->all());
+        $user = User::create($request->only('username','password','gender'));
         return response()->json($user,201);
+        //return $this->successResponse($users, Response::HTTP_CREATED);
     }
     public function show($id)
     {
