@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 use App\Models\User;
-use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use App\Traits\ApiResponser;
 use DB;
 
 Class UserController extends Controller {
@@ -34,7 +35,7 @@ Class UserController extends Controller {
     }
     public function add(Request $request){
         $rules = [
-            'username' => 'required|string|unique:users,username',
+            'username' => 'required|max:20',
             //'password' => 'required|string|min:6|max:20',
             //'username' => 'required|max:20',
             'password' => 'required|max:20',
@@ -42,39 +43,65 @@ Class UserController extends Controller {
         ];
 
         $this->validate($request,$rules);
-        //$user = User::create($request->all());
-        $user = User::create($request->only('username','password','gender'));
-        return response()->json($user,201);
-        //return $this->successResponse($users, Response::HTTP_CREATED);
+        $user = User::create($request->all());
+        //$user = User::create($request->only('username','password','gender'));
+        //return response()->json($user,201);
+        return $this->successResponse($user, Response::HTTP_CREATED);
     }
     public function show($id)
-    {
-        $user = User::where('id',$id)->first();
-        if(!$user){
-            return response()->json(['message' => 'User not Found.'],404);
-        }
-        return response()->json($user,200);
+    {   
+        $user = User::findOrFail($id);
+        return $this->successResponse($user);
+        //$user = User::where('id',$id)->first();
+        //if(!$user){
+        //    return response()->json(['message' => 'User not Found.'],404);
+        //}
+        //return response()->json($user,200);
     }
     public function delete($id){
-        $user = User::where('id',$id)->first();
-        if($user) { 
+            $user = User::findOrFail($id);
             $user->delete();
-            return response()->json(['message' => 'User deleted successfully.'],200);
-        }
-        return response()->json(['message' => 'User not Found.'],404);
+            return $this->successResponse($user);
+        //$user = User::where('id',$id)->first();
+        //if($user) { 
+           // $user->delete();
+            //return response()->json(['message' => 'User deleted successfully.'],200);
+        //}
+        //return response()->json(['message' => 'User not Found.'],404);
     }
-    public function update($id, Request $request){
-        $user = User::where('id', $id)->first();
-        if(!$user){ 
-            return response()->json(['message' => 'User not Found.'],404);
-        }
-
+    /**
+     * Update an existing user
+     */
+    public function update(Request $request, $id){
         $rules = [
-            'username' => 'string|unique:users,username,'.$id.'|max:20',
-            'password' => 'string|min:6|max:20',
+            'username' => 'max:20',
+            'password' => 'max:20',
+            'gender'   => 'in:Male,Female',
         ];
         $this->validate($request, $rules);
-        $user->update($request->all());
-        return response()->json($user,200); 
+        $user = User::findOrFail($id);
+        $user->fill($request->all());
+
+        if($user->isClean()){
+            return $this->errorResponse(
+                'At least one value must change', 
+                Response::HTTP_UNPROCESSABLE_ENTITY
+            );
+        }
+        $user->save();
+        return $this->successResponse($user);
     }
+    //public function update($id, Request $request){
+        //$user = User::where('id', $id)->first();
+        //if(!$user){ 
+            //return response()->json(['message' => 'User not Found.'],404);
+        //}
+
+        //$rules = [
+            //'username' => 'string|unique:users,username,'.$id.'|max:20',
+            //'password' => 'string|min:6|max:20',
+        //];
+        //$this->validate($request, $rules);
+        //$user->update($request->all());
+        //return response()->json($user,200); 
 }
