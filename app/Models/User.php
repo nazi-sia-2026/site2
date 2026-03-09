@@ -12,4 +12,7 @@ class User extends Model{
     //];
     public $timestamps = false;
     protected $primaryKey = 'id';
+
+    //hidden password
+    protected $hidden = ['password'];
 }
