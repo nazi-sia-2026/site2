@@ -18,12 +18,28 @@ $router->get('/', function () use ($router) {
 });
 // unsecure route
 $router->group(['prefix' => 'api'], function () use ($router) {
-    $router->get('/users', ['uses' => 'UserController@getUsers']);
+    $router->get('/users2', ['uses' => 'UserController@getUsers']);
 });
 
-$router->get('/users', 'UserController@getUsers');
-$router->post('/users', 'UserController@add');
-$router->get('/users/{id}', 'UserController@show');
-$router->put('/users/{id}','UserController@update');
-$router->patch('/users/{id}','UserController@update');
-$router->delete('/users/{id}','UserController@delete');
+$router->get('/users2', 'UserController@index'); 
+$router->post('/users2', 'UserController@add');
+$router->get('/users2/{id}', 'UserController@show');
+$router->put('/users2/{id}','UserController@update');
+$router->patch('/users2/{id}','UserController@update');
+$router->delete('/users2/{id}','UserController@delete');
+
+$router->get('/test-db', function() {
+    try {
+        $results = app('db')->select("SELECT * FROM users");
+        return response()->json([
+            'status' => 'Connected!',
+            'count' => count($results),
+            'data' => $results
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'Error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});

@@ -15,7 +15,10 @@ Class UserController extends Controller {
     {
         $this->request = $request;
     }
-    public function getUsers(){
+    public function getUsers() {
+    return "The code is reaching the controller!";
+    }
+    /*public function getUsers(){
         //$users = User::all();
         //return response()->json($users,200);
         $users = DB::connection('mysql')
@@ -23,15 +26,15 @@ Class UserController extends Controller {
 
             //return response()->json($users,200);
             return $this->successResponse($users);
-    }
+    }*/
     /**
      * Return the list of users
      * @return Illuminate\Http\Response
      */
     public function index(){
         $users = User::all();
-        //return response()->json($users,200);
-        return $this->successResponse($users);
+        return response()->json($users,200);
+        //return $this->successResponse($users);
     }
     public function add(Request $request){
         $rules = [
